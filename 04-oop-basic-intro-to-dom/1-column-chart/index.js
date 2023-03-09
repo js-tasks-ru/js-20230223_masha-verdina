@@ -51,7 +51,7 @@ export default class ColumnChart {
 
   _getColumnProps() {
     const maxValue = Math.max(...this._data);
-    const scale = 50 / maxValue;
+    const scale = this._chartHeight / maxValue;
 
     return this._data.map(item => {
       return {
