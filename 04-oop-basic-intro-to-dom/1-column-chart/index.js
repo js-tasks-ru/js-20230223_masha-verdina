@@ -1,9 +1,7 @@
 export default class ColumnChart {
-  _chartHeight = 50
-
-  get chartHeight() {
-    return this._chartHeight;
-  }
+  chartHeight = 50
+  loadingClass = "column-chart_loading"
+  containerBodyElement = {}
 
   constructor({
     data = [],
@@ -12,48 +10,69 @@ export default class ColumnChart {
     value = 0,
     formatHeading = (data) => data
   } = {}) {
-    this._data = data;
-    this._label = label;
-    this._link = link;
-    this._value = value;
-    this._formatHeading = formatHeading;
+    this.data = data;
+    this.label = label;
+    this.link = link;
+    this.value = value;
+    this.formatHeading = formatHeading;
     this.render();
+  }
+
+  get template() {
+    return `<div class="column-chart ${this.loadingClass}" style="--chart-height: ${this.chartHeight}">
+                <div class="column-chart__title">
+                    ${this.getChartTitle()}
+                </div>
+                <div class="column-chart__container">
+                    ${this.getChartContainer()}
+                </div>
+            </div>`;
   }
 
   render() {
     const wrapper = document.createElement('div');
 
-    wrapper.innerHTML = ` <div class="column-chart ${this._getChartMods()}" style="--chart-height: ${this._chartHeight}">
-                            ${this._getChartTitle()}
-                            ${this._getChartContainer()}
-                          </div>`;
+    wrapper.innerHTML = this.template;
 
     this.element = wrapper.firstElementChild;
+
+    if (this.data.length) {
+      this.element.classList.remove(this.loadingClass);
+    }
+    this.containerBodyElement = this.element.querySelector('[data-element="body"]');
   }
 
   update(data = []) {
-    this._data = data;
-    this.render();
+    if (this.data.length === 0 && data.length !== 0) {
+      this.element.classList.remove(this.loadingClass);
+    }
+    if (this.data.length !== 0 && data.length === 0) {
+      this.element.classList.add(this.loadingClass);
+    }
+    this.data = data;
+    this.containerBodyElement.innerHTML = this.getChartColumns();
   }
 
   destroy() {
     this.element.remove();
-    this._data = [];
-    this._label = '';
-    this._link = '';
-    this._value = 0;
-    this._formatHeading = (data) => (data);
+    this.containerBodyElement = {};
+    this.data = [];
+    this.label = '';
+    this.link = '';
+    this.value = 0;
+    this.formatHeading = (data) => (data);
   }
 
   remove() {
     this.element.remove();
+    this.containerBodyElement = {};
   }
 
-  _getColumnProps() {
-    const maxValue = Math.max(...this._data);
-    const scale = this._chartHeight / maxValue;
+  getColumnProps() {
+    const maxValue = Math.max(...this.data);
+    const scale = this.chartHeight / maxValue;
 
-    return this._data.map(item => {
+    return this.data.map(item => {
       return {
         percent: (item / maxValue * 100).toFixed(0) + '%',
         value: String(Math.floor(item * scale))
@@ -61,32 +80,26 @@ export default class ColumnChart {
     });
   }
 
-  _getChartMods() {
-    return this._data.length === 0 ? " column-chart_loading" : "";
+  getChartTitle() {
+    return `
+        ${this.label}
+        ${this.link ? `<a href=${this.link} class="column-chart__link">View all</a>` : ''}
+      `;
   }
 
-  _getChartTitle() {
-    return `<div class="column-chart__title">
-        ${this._label}
-        ${this._link ? `<a href=${this._link} class="column-chart__link">View all</a>` : ''}
-      </div>`;
-  }
-
-  _getChartColumns() {
-    const cols = this._getColumnProps();
+  getChartColumns() {
+    const cols = this.getColumnProps();
     return cols.map(
       ({percent, value}) => `<div style="--value: ${value}" data-tooltip=${percent}></div>`
     ).join('');
   }
 
-  _getChartContainer() {
-    return `<div class="column-chart__container">
-              <div data-element="header" class="column-chart__header">
-                ${this._formatHeading(this._value)}
-              </div>
-              <div data-element="body" class="column-chart__chart">
-                ${this._getChartColumns()}
-              </div>
+  getChartContainer() {
+    return `<div data-element="header" class="column-chart__header">
+              ${this.formatHeading(this.value)}
+            </div>
+            <div data-element="body" class="column-chart__chart">
+              ${this.getChartColumns()}
             </div>`;
   }
 }
