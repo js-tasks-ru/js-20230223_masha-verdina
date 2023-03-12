@@ -71,8 +71,12 @@
 
   const sortableTable = new SortableTable(headerConfig, data);
 
+  const root = document.getElementById('root');
   root.append(sortableTable.element);
 
+  const sort = document.getElementById('sort');
+  const field = document.getElementById('field');
+  const order = document.getElementById('order');
   sort.addEventListener('click', () => {
     const fieldValue = field.value;
     const orderValue = order.value;
