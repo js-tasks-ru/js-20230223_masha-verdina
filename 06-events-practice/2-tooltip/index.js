@@ -1,22 +1,25 @@
 class Tooltip {
-  trackedElements = [];
   onPointerover = (e) => {
-    const { tooltip } = e.currentTarget.dataset;
-    this.element.style.left = `${e.clientX + 5}px`;
-    this.element.style.top = `${e.clientY + 5}px`;
-    this.render(tooltip);
-    e.currentTarget.addEventListener('pointermove', this.onPointermove);
+    const { tooltip } = e.target.dataset;
+    if (tooltip) {
+      const shift = 5;
+      this.element.style.left = `${e.clientX + shift}px`;
+      this.element.style.top = `${e.clientY + shift}px`;
+      this.render(tooltip);
+      document.addEventListener('pointermove', this.onPointermove);
+    }
   }
 
   onPointermove = (e) => {
-    this.element.style.left = `${e.clientX + 5}px`;
-    this.element.style.top = `${e.clientY + 5}px`;
+    const shift = 5;
+    this.element.style.left = `${e.clientX + shift}px`;
+    this.element.style.top = `${e.clientY + shift}px`;
   }
 
   onPointerout = (e) => {
     this.element.textContent = '';
     this.remove();
-    e.currentTarget.removeEventListener('pointermove', this.onPointermove);
+    document.removeEventListener('pointermove', this.onPointermove);
   }
 
   constructor() {
@@ -28,12 +31,12 @@ class Tooltip {
   }
 
   destroy() {
-    Tooltip.instance = null;
-    this.trackedElements = [];
     if (this.element) {
       this.element.remove();
       this.element = null;
     }
+    this.removeEventListeners();
+    Tooltip.instance = null;
   }
 
   remove() {
@@ -59,25 +62,18 @@ class Tooltip {
       document.body.append(this.element);
     }
 
-    if (this.trackedElements.length) {
-      this.removeEventListeners();
-    }
-    this.trackedElements = document.querySelectorAll("[data-tooltip]");
+    this.removeEventListeners();
     this.addEventListeners();
   }
 
   addEventListeners () {
-    for (const elem of this.trackedElements) {
-      elem.addEventListener('pointerover', this.onPointerover, { capture: true });
-      elem.addEventListener('pointerout', this.onPointerout, { capture: true });
-    }
+    document.addEventListener('pointerover', this.onPointerover, { capture: true });
+    document.addEventListener('pointerout', this.onPointerout, { capture: true });
   }
 
   removeEventListeners () {
-    for (const elem of this.trackedElements) {
-      elem.removeEventListener('pointerover', this.onPointerover);
-      elem.removeEventListener('pointerout', this.onPointerout);
-    }
+    document.removeEventListener('pointerover', this.onPointerover);
+    document.removeEventListener('pointerout', this.onPointerout);
   }
 }
 
