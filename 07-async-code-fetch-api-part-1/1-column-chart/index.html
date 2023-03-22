@@ -47,10 +47,6 @@
         link: '#'
       });
 
-      loadOrders.addEventListener('click', () => {
-        ordersChart.update(new Date(start.value), new Date(end.value))
-      });
-
       const salesChart = new ColumnChart({
         url: 'api/dashboard/sales',
         range: {
@@ -68,6 +64,12 @@
           to
         },
         label: 'customers',
+      });
+
+      loadOrders.addEventListener('click', () => {
+        ordersChart.update(new Date(start.value), new Date(end.value))
+        salesChart.update(new Date(start.value), new Date(end.value))
+        customersChart.update(new Date(start.value), new Date(end.value))
       });
 
       orders.append(ordersChart.element);
